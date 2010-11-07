@@ -1,0 +1,72 @@
+/* 
+    jlEmbed - A jQuery Plugin
+    ==================================================================
+    ©2010 JasonLau.biz
+    ==================================================================
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+Complete documentation for this plugin can be found at http://jasonlau.biz/home/jlembed-for-jquery .
+
+Below is a complete list of jlEmbed's options and default values -
+
+id : 'myMedia',
+plugin : 'windowsmedia',
+url : '',
+src : '',
+width : 300,
+height : 45,
+autoplay : true,
+loop : true,
+format : 'objectembed',
+pluginspace : '',
+codebase : '',
+params : '',
+af_params : 'allowscriptaccess=local allownetworking=local scale=showall quality=high wmode=transparent',
+rp_params : 'console=cons controls=all',
+qt_params : 'cache=true controller=true',
+sl_params : '',
+wm_params : 'showControls=true',
+caption : '',
+caption_id : 'myCaption',
+caption_class : '',
+caption_style : '',
+playlist : '',
+musicplayer : '',
+youtube : '',
+youtubekey : 'AI39si7VTVOVTwe6TuTDB36MwOuIEVGdwN844nhbCb7GXi8_90RcEpTgD1BXLAlb_P9CnkzU6RdV1nUvTaI2vay9hBdy8Iuh3g',
+swfobjectuniqueid : 'player' + Math.round(Math.random()*1000),
+youtubechromeless : false,
+youtubevolume : 100,
+youtubedebug : false,
+youtubedisplay : true,
+flash_version : 10,
+shuffle : false,
+value : false,
+m3u_url : ''
+
+Example use -
+
+<script type="text/javascript" src="jquery-latest.js"></script>
+<script type="text/javascript" src="jlembed-latest.js"></script>
+<script type="text/javascript">
+jQuery(function(){
+    $("#my-div").jlEmbed({
+        id : 'player1',
+        youtube : 'Cw2HAD9A_rw',
+        format : 'swfobject',
+        autoplay : false,
+        youtubechromeless : false
+    });
+</script>
