@@ -4,7 +4,7 @@
     
     jlEmbed - A plugin for jQuery
     ==================================================================
-    ©2009-2011 JasonLau.biz - Version 4.9.7.3
+    Â©2009-2011 JasonLau.biz - Version 4.9.7.3
     Based on a work at http://jasonlau.biz/home/jlembed-for-jquery
     Permissions beyond the scope of this license may be requested at 
     http://jasonlau.biz/home/contact-me.
@@ -130,7 +130,7 @@
 
                     // end
 
-                    if(youtube != ''){                       
+                    if(youtube != ''){
                         var is_ytplaylist = false;
                         var yt_playlist = youtube.split('|');
                         if(yt_playlist[1] != ''){
