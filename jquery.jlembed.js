@@ -1,28 +1,39 @@
 <!-- 
 
- /* 
-    jlEmbed - A Plugin For jQuery
+/*
+    
+    jlEmbed - A plugin for jQuery
     ==================================================================
-    Â© JasonLau.biz - Version 4.9.7.2
+    ©2009-2011 JasonLau.biz - Version 4.9.7.3
+    Based on a work at http://jasonlau.biz/home/jlembed-for-jquery
+    Permissions beyond the scope of this license may be requested at 
+    http://jasonlau.biz/home/contact-me.
     ==================================================================
     This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
+    it under the terms of the Creative Commons Attribution-Noncommercial-Share Alike 3.0 United States License,
+    which can be found at http://creativecommons.org/licenses/by-nc-sa/3.0/us/.
+    
+    You may copy, distribute, transmit, and adapt this work provided all
+    copyright and licensing information remain intact.
+    
+    If you alter, transform, or build upon this work, 
+    you may distribute the resulting work only under the same or similar 
+    license to this one.
+    
+    You may NOT use this work for COMMERCIAL PURPOSES without express
+    written permission from the author. AKA $
+    
+    This work is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ 
 */
 
 (function($){
     $.fn.extend({
         jlEmbed: function(options) {
             var defaults = {
+                version : '4.9.7.3',
                 id : 'myMedia',
                 plugin : 'windowsmedia',
                 url : '',
@@ -31,7 +42,7 @@
                 height : 45,
                 autoplay : true,
                 loop : true,
-                format : 'objectembed',
+                format : '',
                 pluginspace : '',
                 codebase : '',
                 params : '',
@@ -69,7 +80,6 @@
                     height = o.height,
                     autoplay = o.autoplay,
                     loop = o.loop,
-                    format = o.format,
                     pluginspace = o.pluginspace,
                     codebase = o.codebase,
                     params = o.params,
@@ -103,11 +113,24 @@
                     autoplay = (o.autoplay == 'yes' || o.autoplay == true) ? true : false;
                     loop = (o.loop == 'yes' || o.loop == true) ? true : false;
                     youtubechromeless = (o.youtubechromeless == 'yes' || o.youtubechromeless == true) ? true : false;
-                    m3u_url = o.m3u_url; 
+                    m3u_url = o.m3u_url;
+                    version = o.version;
+                    if(!o.format){                        
+                        if(youtube || plugin == 'adobeflash'){
+                            format = 'swfobject';                          
+                        } else {
+                            format = 'objectembed';
+                        }
+                    } else {
+                        format = o.format;
+                    }                    
+                    if(plugin != 'adobeflash' && !youtube && format == 'swfobject'){
+                        format = 'objectembed';
+                    }
 
                     // end
 
-                    if(youtube != ''){
+                    if(youtube != ''){                       
                         var is_ytplaylist = false;
                         var yt_playlist = youtube.split('|');
                         if(yt_playlist[1] != ''){
@@ -125,7 +148,7 @@
                            }
                         }
                         plugin = 'adobeflash';
-                        swfobject_params = 'allowscriptaccess: "always"';
+                        swfobject_params = 'allowscriptaccess: "always", allowfullscreen: "true"';
                         if(youtubechromeless){
                             var yt_vid_url = 'http://www.youtube.com/v/' + yt_playlist[0];
                             url = 'http://www.youtube.com/apiplayer?enablejsapi=1&version=3&key=' + youtubekey + '&playerapiid=' + id;
@@ -170,6 +193,7 @@
                     } else if(playlist != ''){
                         var b = '';
                         links = playlist.split('|');
+                        if(shuffle) links.sort(function(){return (Math.round(Math.random())-0.5)});
                         for(var xx in links){
                             b += '||' + links[xx] + '::' + links[xx];
                             build = jlembed_base64_encode(b);
@@ -279,19 +303,19 @@
                     
                     switch(format){
                         case 'swfobject':     
-                        results += '\n<div id="' + swfobjectuniqueid + '"></div>\n<script type="text/javascript">var params = { ' + swfobject_params + ' }; var atts = { id: "' + id + '" }; jlembed_swfobject.embedSWF("' + url + '","' + swfobjectuniqueid + '", "' + width + '", "' + height + '", "' + flash_version + '", null, null, params, atts);</script>';
+                        results += '<div id="' + swfobjectuniqueid + '"></div>\n<script type="text/javascript">var params = { ' + swfobject_params + ' }; var atts = { id: "' + id + '" }; jlembed_swfobject.embedSWF("' + url + '","' + swfobjectuniqueid + '", "' + width + '", "' + height + '", "' + flash_version + '", null, null, params, atts);</script>';
                         break;
                                                 
                         case 'object':
                         switch(plugin){
                             case 'adobeflash':
-                            results += '\n<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" id="' + id + '" type="application/x-shockwave-flash" height="'+ height +'" width="'+ width +'" codebase="'+ codebase +'" pluginspace="'+ pluginspace +'"><param name="movie" value="'+ url +'" />' + o_params + '</object>';
+                            results += '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" id="' + id + '" type="application/x-shockwave-flash" height="'+ height +'" width="'+ width +'" codebase="'+ codebase +'" pluginspace="'+ pluginspace +'"><param name="movie" value="'+ url +'" />' + o_params + '</object>';
                             break;
                             
                             case 'quicktime':
                             (loop == true) ? l = 'true' : l = 'false';
                             (autoplay == true) ? ap = 'true' : ap = 'false';
-                            results += '\n<object id="' + id + '" type="video/quicktime" height="'+ height +'" width="'+ width +'" data="'+ url +'">\n<param name="autoplay" value="'+ ap +'" />\n<param name="loop" value="'+ l +'" />\n' + o_params + '</object>';
+                            results += '<object id="' + id + '" type="video/quicktime" height="'+ height +'" width="'+ width +'" data="'+ url +'">\n<param name="autoplay" value="'+ ap +'" />\n<param name="loop" value="'+ l +'" />\n' + o_params + '</object>';
                             break;
                             
                             case 'realplayer':
@@ -306,11 +330,11 @@
                             }
                             (loop == true) ? l = 'true' : l = 'false';
                             (autoplay == true) ? ap = 'true' : ap = 'false';
-                            results += '\n<object id="' + id + '" type="audio/x-pn-realaudio-plugin" height="'+ height +'" width="'+ width +'" ' + cid + '>\n<param name="src" value="'+ url +'" />\n<param name="autostart" value="'+ ap +'" />\n<param name="loop" value="'+ l +'" />\n' + o_params + '</object>';
+                            results += '<object id="' + id + '" type="audio/x-pn-realaudio-plugin" height="'+ height +'" width="'+ width +'" ' + cid + '>\n<param name="src" value="'+ url +'" />\n<param name="autostart" value="'+ ap +'" />\n<param name="loop" value="'+ l +'" />\n' + o_params + '</object>';
                             break;
                             
                             case 'silverlight':
-                            results += '\n<object id="' + id + '" width="'+ width +'" height="'+ height +'" data="data:application/x-silverlight-2," type="application/x-silverlight-2">\n<param name="source" value="'+ url +'"/>\n' + o_params + '<a href="http://go.microsoft.com/fwlink/?LinkID=149156" style="text-decoration: none;"><img src="http://go.microsoft.com/fwlink/?LinkId=108181" alt="Get Microsoft Silverlight" style="border-style: none"/></a>\n</object>';
+                            results += '<object id="' + id + '" width="'+ width +'" height="'+ height +'" data="data:application/x-silverlight-2," type="application/x-silverlight-2">\n<param name="source" value="'+ url +'"/>\n' + o_params + '<a href="http://go.microsoft.com/fwlink/?LinkID=149156" style="text-decoration: none;"><img src="http://go.microsoft.com/fwlink/?LinkId=108181" alt="Get Microsoft Silverlight" style="border-style: none"/></a>\n</object>';
                             break;
                             
                             default:                            
@@ -325,64 +349,64 @@
                             }
                             (loop == true) ? l = 'true' : l = 'false';
                             (autoplay == true) ? ap = 'true' : ap = 'false';
-                            results += '\n<object id="' + id + '" type="'+ wm_type +'" height="'+ height +'" width="'+ width +'" ' + cid + ' codebase="' + codebase + '" standby="Loading ..." fileName="'+ url +'">\n<param name="fileName" value="'+ url +'">\n<param name="autoStart" value="'+ ap +'">\n<param name="loop" value="'+ l +'">\n' + o_params + '</object>';
+                            results += '<object id="' + id + '" type="'+ wm_type +'" height="'+ height +'" width="'+ width +'" ' + cid + ' codebase="' + codebase + '" standby="Loading ..." fileName="'+ url +'">\n<param name="fileName" value="'+ url +'">\n<param name="autoStart" value="'+ ap +'">\n<param name="loop" value="'+ l +'">\n' + o_params + '</object>';
                         }
                         break;
                         
                         case 'embed':
                         switch(plugin){
                             case 'adobeflash':
-                            results += '\n<embed id="' + id + '" type="application/x-shockwave-flash" height="'+ height +'" width="'+ width +'" src="'+ url +'" codebase="'+ o.codebase +'" pluginspace="'+ o.pluginspace +'"></embed>';
+                            results += '<embed id="' + id + '" type="application/x-shockwave-flash" height="'+ height +'" width="'+ width +'" src="'+ url +'" codebase="'+ o.codebase +'" pluginspace="'+ o.pluginspace +'"></embed>';
                             break;
                             case 'quicktime':
                             (loop == true) ? l = 'true' : l = 'false';
                             (autoplay == true) ? ap = 'true' : ap = 'false';
-                            results += '\n<embed id="' + id + '" type="video/quicktime" height="'+ height +'" width="'+ width +'" data="'+ url +'" controller="true" autoplay="'+ ap +'" loop="'+ l +'" cache="true"></embed>';
+                            results += '<embed id="' + id + '" type="video/quicktime" height="'+ height +'" width="'+ width +'" data="'+ url +'" controller="true" autoplay="'+ ap +'" loop="'+ l +'" cache="true"></embed>';
                             break;
                             
                             case 'realplayer':
                             (loop == true) ? l = 'true' : l = 'false';
                             (autoplay == true) ? ap = 'true' : ap = 'false';
-                            results += '\n<embed id="' + id + '" type="audio/x-pn-realaudio-plugin" height="'+ height +'" width="'+ width +'" src="'+ url +'" autostart="'+ ap +'" loop="'+ l +'" console="cons" controls="all"></embed>';
+                            results += '<embed id="' + id + '" type="audio/x-pn-realaudio-plugin" height="'+ height +'" width="'+ width +'" src="'+ url +'" autostart="'+ ap +'" loop="'+ l +'" console="cons" controls="all"></embed>';
                             break;
                             
                             case 'silverlight':
-                            results += '\n<embed id="' + id + '" width="'+ width +'" height="'+ height +'" data="data:application/x-silverlight-2," type="application/x-silverlight-2" source="'+ url +' ' + e_params + '><noembed><a href="http://go.microsoft.com/fwlink/?LinkID=149156" style="text-decoration: none;"><img src="http://go.microsoft.com/fwlink/?LinkId=108181" alt="Get Microsoft Silverlight" style="border-style: none"/></a></noembed></embed>';
+                            results += '<embed id="' + id + '" width="'+ width +'" height="'+ height +'" data="data:application/x-silverlight-2," type="application/x-silverlight-2" source="'+ url +' ' + e_params + '><noembed><a href="http://go.microsoft.com/fwlink/?LinkID=149156" style="text-decoration: none;"><img src="http://go.microsoft.com/fwlink/?LinkId=108181" alt="Get Microsoft Silverlight" style="border-style: none"/></a></noembed></embed>';
                             break;
                             
                             default:
                             (loop == true) ? l = 'true' : l = 'false';
                             (autoplay == true) ? ap = 'true' : ap = 'false';
-                            results += '\n<embed id="' + id + '" type="'+ wm_type +'" pluginspage="'+ pluginspace +'" height="'+ height +'" width="'+ width +'" src="'+ url +'" autostart="'+ ap +'" loop="'+ l +'" ' + e_params + '></embed>';
+                            results += '<embed id="' + id + '" type="'+ wm_type +'" pluginspage="'+ pluginspace +'" height="'+ height +'" width="'+ width +'" src="'+ url +'" autostart="'+ ap +'" loop="'+ l +'" ' + e_params + '></embed>';
                         }
                         break;
                         
                         default:
                         switch(plugin){
                             case 'adobeflash':
-                            results += '\n<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" id="' + id + '" type="application/x-shockwave-flash" height="'+ height +'" width="'+ width +'" codebase="'+ codebase +'" pluginspace="'+ pluginspace +'">\n<param name="movie" value="'+ url +'" />\n' + o_params + '<embed id="' + id + '" type="application/x-shockwave-flash" codebase="'+ codebase +'" pluginspace="'+ pluginspace +'" height="'+ height +'" width="'+ width +'" src="'+ url +'" ' + e_params + '></embed>\n</object>';
+                            results += '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000" id="' + id + '" type="application/x-shockwave-flash" height="'+ height +'" width="'+ width +'" codebase="'+ codebase +'" pluginspace="'+ pluginspace +'">\n<param name="movie" value="'+ url +'" />\n' + o_params + '<embed id="' + id + '" type="application/x-shockwave-flash" codebase="'+ codebase +'" pluginspace="'+ pluginspace +'" height="'+ height +'" width="'+ width +'" src="'+ url +'" ' + e_params + '></embed>\n</object>';
                             break;
                             
                             case 'quicktime':
                             (loop == true) ? l = 'true' : l = 'false';
                             (autoplay == true) ? ap = 'true' : ap = 'false';
-                            results += '\n<object id="' + id + '" type="video/quicktime" height="'+ height +'" width="'+ width +'" data="'+ url +'">\n<param name="autoplay" value="'+ ap +'" />\n<param name="loop" value="'+ l +'" />\n' + o_params + '<embed id="' + id + '" type="video/quicktime" height="'+ height +'" width="'+ width +'" data="'+ url +'" controller="true" autoplay="'+ ap +'" loop="'+ l +'" ' + e_params + '></embed>\n</object>';
+                            results += '<object id="' + id + '" type="video/quicktime" height="'+ height +'" width="'+ width +'" data="'+ url +'">\n<param name="autoplay" value="'+ ap +'" />\n<param name="loop" value="'+ l +'" />\n' + o_params + '<embed id="' + id + '" type="video/quicktime" height="'+ height +'" width="'+ width +'" data="'+ url +'" controller="true" autoplay="'+ ap +'" loop="'+ l +'" ' + e_params + '></embed>\n</object>';
                             break;
                             
                             case 'realplayer':
                             (loop == true) ? l = 'true' : l = 'false';
                             (autoplay == true) ? ap = 'true' : ap = 'false';
-                            results += '\n<object id="' + id + '" type="audio/x-pn-realaudio-plugin" classid="clsid:CFCDAA03-8BE4-11cf-B84B-0020AFBBCCFA" height="'+ height +'" width="'+ width +'">\n<param name="src" value="'+ url +'" />\n<param name="autostart" value="'+ ap +'" />\n<param name="loop" value="'+ l +'" />\n' + o_params + '<embed id="' + id + '" type="audio/x-pn-realaudio-plugin" height="'+ height +'" width="'+ width +'" src="'+ url +'" autostart="'+ ap +'" loop="'+ l +'" ' + e_params + '></embed>\n</object>';
+                            results += '<object id="' + id + '" type="audio/x-pn-realaudio-plugin" classid="clsid:CFCDAA03-8BE4-11cf-B84B-0020AFBBCCFA" height="'+ height +'" width="'+ width +'">\n<param name="src" value="'+ url +'" />\n<param name="autostart" value="'+ ap +'" />\n<param name="loop" value="'+ l +'" />\n' + o_params + '<embed id="' + id + '" type="audio/x-pn-realaudio-plugin" height="'+ height +'" width="'+ width +'" src="'+ url +'" autostart="'+ ap +'" loop="'+ l +'" ' + e_params + '></embed>\n</object>';
                             break;
                             
                             case 'silverlight':
-                            results += '\n<object id="' + id + '" width="'+ width +'" height="'+ height +'" data="data:application/x-silverlight-2," type="application/x-silverlight-2"><param name="source" value="'+ url +'"/>\n' + o_params + '<a href="http://go.microsoft.com/fwlink/?LinkID=149156" style="text-decoration: none;"><img src="http://go.microsoft.com/fwlink/?LinkId=108181" alt="Get Microsoft Silverlight" style="border-style: none"/></a>\n<embed id="' + id + '" width="'+ width +'" height="'+ height +'" data="data:application/x-silverlight-2," type="application/x-silverlight-2" source="'+ url +' ' + e_params + '></embed>\n</object>';
+                            results += '<object id="' + id + '" width="'+ width +'" height="'+ height +'" data="data:application/x-silverlight-2," type="application/x-silverlight-2"><param name="source" value="'+ url +'"/>\n' + o_params + '<a href="http://go.microsoft.com/fwlink/?LinkID=149156" style="text-decoration: none;"><img src="http://go.microsoft.com/fwlink/?LinkId=108181" alt="Get Microsoft Silverlight" style="border-style: none"/></a>\n<embed id="' + id + '" width="'+ width +'" height="'+ height +'" data="data:application/x-silverlight-2," type="application/x-silverlight-2" source="'+ url +' ' + e_params + '></embed>\n</object>';
                             break;
                             
                             default:
                             (loop == true) ? l = 'true' : l = 'false';
                             (autoplay == true) ? ap = 'true' : ap = 'false';
-                            results += '\n<object id="' + id + '" type="'+ wm_type +'" height="'+ height +'" width="'+ width +'" classid="CLSID:22d6f312-b0f6-11d0-94ab-0080c74c7e95" codebase="' + codebase + '" standby="Loading ..." type="application/x-oleobject">\n<param name="fileName" value="'+ url +'">\n<param name="autostart" value="'+ ap +'">\n<param name="loop" value="'+ l +'">\n' + o_params + '<embed id="' + id + '" type="'+ wm_type +'" pluginspage="'+ pluginspace +'" height="'+ height +'" width="'+ width +'" src="'+ url +'" autostart="'+ ap +'" loop="'+ l +'" ' + e_params + '></embed>\n</object>';
+                            results += '<object id="' + id + '" type="'+ wm_type +'" height="'+ height +'" width="'+ width +'" classid="CLSID:22d6f312-b0f6-11d0-94ab-0080c74c7e95" codebase="' + codebase + '" standby="Loading ..." type="application/x-oleobject">\n<param name="fileName" value="'+ url +'">\n<param name="autostart" value="'+ ap +'">\n<param name="loop" value="'+ l +'">\n' + o_params + '<embed id="' + id + '" type="'+ wm_type +'" pluginspage="'+ pluginspace +'" height="'+ height +'" width="'+ width +'" src="'+ url +'" autostart="'+ ap +'" loop="'+ l +'" ' + e_params + '></embed>\n</object>';
                         }
                     }
                     
@@ -392,7 +416,7 @@
                         }
                         var pluginList = {
                             flash: {
-                                activex: ["ShockwaveFlash.ShockwaveFlash", "ShockwaveFlash.ShockwaveFlash.3", "ShockwaveFlash.ShockwaveFlash.4", "ShockwaveFlash.ShockwaveFlash.5", "ShockwaveFlash.ShockwaveFlash.6", "ShockwaveFlash.ShockwaveFlash.7"],
+                                activex: ["ShockwaveFlash.ShockwaveFlash", "ShockwaveFlash.ShockwaveFlash.3", "ShockwaveFlash.ShockwaveFlash.4", "ShockwaveFlash.ShockwaveFlash.5", "ShockwaveFlash.ShockwaveFlash.6", "ShockwaveFlash.ShockwaveFlash.7", "ShockwaveFlash.ShockwaveFlash.8", "ShockwaveFlash.ShockwaveFlash.9", "ShockwaveFlash.ShockwaveFlash.10"],
                                 plugin: /flash/gim
                             },
                             silverlight: {
@@ -416,65 +440,115 @@
                                 plugin: /realplayer/gim
                             }
                         };
-                        var hasPlugin = function (p) {
+                        
+                        var plugin_is_installed = false;
+                        switch(plugin){
+                            case 'adobeflash':
+                            $.browser.flash = false;
                             if (window.ActiveXObject) {
-                                $.browser[p] = false;
-                                for (i = 0; i < pluginList[p].activex.length; i++) {
+                                
+                                for (i = 0; i < pluginList.flash.activex.length; i++) {
                                     try {
-                                        new ActiveXObject(pluginList[p].activex[i]);
-                                        $.browser[p] = true;
+                                        new ActiveXObject(pluginList.flash.activex[i]);
+                                        $.browser.flash = true;
+                                    } catch (e) {}
+                                }
+                            } else {
+                                
+                                $.browser.flash = false;
+                                $.each(navigator.plugins, function () {
+                                    if (this.name.match(pluginList.flash.plugin)) {
+                                        $.browser.flash = true;
+                                    }
+                                });
+                            }
+                            if(!$.browser.flash){
+                                install_plugin = '\n<a href="http://get.adobe.com/flashplayer/" target="_blank">Please install the Adobe Flash plugin to view this content. Follow this link to open the official Adobe Flash download page in a new window.</a>\n';
+                            }
+                            plugin_is_installed = $.browser.flash;
+                            break;
+                            
+                            case 'quicktime':
+                            $.browser.quicktime = false;
+                            if (window.ActiveXObject) {
+                                for (i = 0; i < pluginList.quicktime.activex.length; i++) {
+                                    try {
+                                        new ActiveXObject(pluginList.quicktime.activex[i]);
+                                        $.browser.quicktime = true;
                                     } catch (e) {}
                                 }
                             } else {
                                 $.each(navigator.plugins, function () {
-                                    if (this.name.match(pluginList[p].plugin)) {
-                                        $.browser[p] = true;
+                                    if (this.name.match(pluginList.quicktime.plugin)) {
+                                        $.browser.quicktime = true;
                                         return false;
                                     } else {
-                                        $.browser[p] = false;
+                                        $.browser.quicktime = false;
                                     }
                                 });
                             }
-                        };
-                        $.each(pluginList, function (i, n) {
-                            hasPlugin(i);
-                        });
-
-                    switch(plugin){
-                        case 'adobeflash':
-                        var plugin_installed = $.browser.flash;
-                        
-                        if(!plugin_installed ){
-                            var install_plugin = '\n<a href="http://get.adobe.com/flashplayer/" target="_blank">Please install the Adobe Flash plugin to view this content. Follow this link to open the official Adobe Flash download page in a new window.</a>\n';
-                        }                    
-                        break;
-                        
-                        case 'quicktime':
-                        var plugin_installed = $.browser.quicktime;
-                        if(!plugin_installed){
-                            var install_plugin = '\n<a href="http://www.apple.com/quicktime/download/" target="_blank">Please install the Apple QuickTime plugin to view this content. Follow this link to open the official Apple QuickTime download page in a new window.</a>\n';                          
+                            if(!$.browser.quicktime){
+                                install_plugin = '\n<a href="http://www.apple.com/quicktime/download/" target="_blank">Please install the Apple QuickTime plugin to view this content. Follow this link to open the official Apple QuickTime download page in a new window.</a>\n';
+                            }
+                            plugin_is_installed = $.browser.quicktime;
+                            break;
+                            
+                            case 'realplayer':
+                            $.browser.realplayer = false;
+                            if (window.ActiveXObject) {
+                                for (i = 0; i < pluginList.realplayer.activex.length; i++) {
+                                    try {
+                                        new ActiveXObject(pluginList.realplayer.activex[i]);
+                                        $.browser.realplayer = true;
+                                    } catch (e) {}
+                                }
+                            } else {
+                                $.each(navigator.plugins, function () {
+                                    if (this.name.match(pluginList.realplayer.plugin)) {
+                                        $.browser.realplayer = true;
+                                        return false;
+                                    } else {
+                                        $.browser.realplayer = false;
+                                    }
+                                });
+                            }
+                            if(!$.browser.realplayer){
+                                install_plugin = '\n<a href="http://real.com/" target="_blank">Please install the Real Player plugin to view this content. Follow this link to open the official Real Player installation page in a new window.</a>\n';
+                            }
+                            plugin_is_installed = $.browser.realplayer;
+                            break;
+                            
+                            case 'silverlight':
+                            // Use Silverlight's built-in installer
+                            break;
+                            
+                            default:
+                            $.browser.windowsmedia = false;
+                            if (window.ActiveXObject) {
+                                for (i = 0; i < pluginList.windowsmedia.activex.length; i++) {
+                                    try {
+                                        new ActiveXObject(pluginList.windowsmedia.activex[i]);
+                                        $.browser.windowsmedia = true;
+                                    } catch (e) {}
+                                }
+                            } else {
+                                $.each(navigator.plugins, function () {
+                                    if (this.name.match(pluginList.windowsmedia.plugin)) {
+                                        $.browser.windowsmedia = true;
+                                        return false;
+                                    } else {
+                                        $.browser.windowsmedia = false;
+                                    }
+                                }); 
+                            }
+                            if(!$.browser.windowsmedia){
+                                install_plugin = '\n<a href="http://www.microsoft.com/windows/windowsmedia/player/default.aspx" target="_blank">Please install the Windows Media Player plugin to view this content. Follow this link to open the official Windows Media Player installation page in a new window.</a>\n';
+                                }
+                                plugin_is_installed = $.browser.windowsmedia;
+                                break;
                         }
-                        break;
-                        
-                        case 'realplayer':
-                        var plugin_installed = $.browser.realplayer;
-                        if(!plugin_installed){
-                            var install_plugin = '\n<a href="http://real.com/" target="_blank">Please install the Real Player plugin to view this content. Follow this link to open the official Real Player installation page in a new window.</a>\n';                            
-                        }
-                        break;
-                        
-                        case 'silverlight':
-                        var plugin_installed = true;
-                        break;
-                        
-                        default:
-                        var plugin_installed = $.browser.windowsmedia;
-                        if(!plugin_installed){
-                            var install_plugin = '\n<a href="http://www.microsoft.com/windows/windowsmedia/player/default.aspx" target="_blank">Please install the Windows Media Player plugin to view this content. Follow this link to open the official Windows Media Player installation page in a new window.</a>\n';
-                        }                       
-                    }
                     
-                    if(!plugin_installed){
+                    if(!plugin_is_installed){
                         results = '';
                         caption = install_plugin;
                     }
@@ -524,14 +598,19 @@
                                 results += '\n<div id="' + caption_id + '" class="' + caption_class + '">\n';
                             }
                         }
-                        results += caption + '\n</div>\n</div>\n';
+                        results += caption + '\n</div>\n</div>';
                     }
                                             
-                    if(plugin_installed){
+                    if(plugin_is_installed){
                         if(value){
                            $(this).val(results); 
                         } else {
-                          $(this).html(results);  
+                            if(version){
+                                $(this).html('<!-- Begin jlEmbed v' + version + ' -->\n' + results + '\n<!-- End jlEmbed -->');
+                            } else {
+                                $(this).html(results);
+                            }
+                           
                         }                       
 
                         if(youtube != ''){
@@ -706,7 +785,8 @@ function onYouTubePlayerReady(playerId){
      if(jQuery('#jlembed_yt_autoplay_' + playerId).val() == 'true'){
         jlembed_playVideo(playerId);
         } else {
-            jlembed_stopVideo(playerId);
+            //jlembed_stopVideo(playerId);
+            jlembed_cueVideoByUrl(playerId, jQuery('#jlembed_yt_video_url_' + playerId).val());
         }   
     } 
     jQuery('#jlembed_yt_player_ready_' + playerId).val('true');
