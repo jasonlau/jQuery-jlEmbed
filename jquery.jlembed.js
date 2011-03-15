@@ -4,7 +4,7 @@
     
     jlEmbed - A plugin for jQuery
     ==================================================================
-    ©2009-2011 JasonLau.biz - Version 4.9.7.3
+    ©2009-2011 JasonLau.biz - Version 4.9.7.4
     Based on a work at http://jasonlau.biz/home/jlembed-for-jquery
     Permissions beyond the scope of this license may be requested at 
     http://jasonlau.biz/home/contact-me.
@@ -33,7 +33,7 @@
     $.fn.extend({
         jlEmbed: function(options) {
             var defaults = {
-                version : '4.9.7.3',
+                version : '4.9.7.4',
                 id : 'myMedia',
                 plugin : 'windowsmedia',
                 url : '',
@@ -67,7 +67,9 @@
                 flash_version : 10,
                 shuffle : false,
                 value : false,
-                m3u_url : ''
+                m3u_url : '',
+                debug: false,
+                debug_container: '#jlembed-debug'
                 }
                 var options =  $.extend(defaults, options);
                 var obj = $(this);
@@ -338,7 +340,7 @@
                             break;
                             
                             default:                            
-                            var cid = 'classid="clsid:22d6f312-b0f6-11d0-94ab-0080c74c7e95"';
+                            var cid = 'classid="clsid:6BF52A52-394A-11D3-B153-00C04F79FAA6"';
                             // Remove classid for Firefox
                             if(browser == 'Netscape'){
                                 var nappver =  navigator.appVersion;
@@ -404,9 +406,14 @@
                             break;
                             
                             default:
-                            (loop == true) ? l = 'true' : l = 'false';
-                            (autoplay == true) ? ap = 'true' : ap = 'false';
-                            results += '<object id="' + id + '" type="'+ wm_type +'" height="'+ height +'" width="'+ width +'" classid="CLSID:22d6f312-b0f6-11d0-94ab-0080c74c7e95" codebase="' + codebase + '" standby="Loading ..." type="application/x-oleobject">\n<param name="fileName" value="'+ url +'">\n<param name="autostart" value="'+ ap +'">\n<param name="loop" value="'+ l +'">\n' + o_params + '<embed id="' + id + '" type="'+ wm_type +'" pluginspage="'+ pluginspace +'" height="'+ height +'" width="'+ width +'" src="'+ url +'" autostart="'+ ap +'" loop="'+ l +'" ' + e_params + '></embed>\n</object>';
+                            if($.browser.msie){
+                               var myInt = setInterval("jlembed_verifyWMPSize('"+id+"', "+height+")", 100); 
+                            }
+                            var xtra = ($.browser.msie !== true) ? ' width="'+width+'" height="'+height+'"' : '';
+                            
+                            var l = (loop == true) ? 'true' : 'false';
+                            var ap = (autoplay == true) ? 'true' : 'false';
+                            results += '<object id="' + id + '"'+xtra+' type="'+ wm_type +'" classid="clsid:22D6F312-B0F6-11D0-94AB-0080C74C7E95" standby="Loading ..." type="application/x-oleobject">\n<param name="FileName" value="'+ url +'">\n<param name="AutoStart" value="'+ ap +'">\n<param name="ShowControls" value="true">\n<param name="ShowPositionControls" value="true">\n<param name="ShowTracker" value="true">\n<param name="EnableTracker" value="true">\n<param name="loop" value="'+ l +'">\n' + o_params + '<embed id="' + id + '"'+xtra+' type="'+ wm_type +'" src="'+ url +'" AutoStart="'+ ap +'" loop="'+ l +'" ' + e_params + ' ShowControls="true" ShowPositionControls="true" ShowTracker="true" EnableTracker="true"></embed>\n</object>';
                         }
                     }
                     
@@ -610,6 +617,14 @@
                             } else {
                                 $(this).html(results);
                             }
+                            
+                            $(this).attr('height', o.height).attr('width', o.width);
+                            $(this).css({'width': o.width + 'px','height': o.height + 'px'});
+                            $("#" + id).attr('height', o.height).attr('width', o.width);
+                            $("#" + id).css({ 'width': width + 'px', 'height': height + 'px' });
+                            if(options.debug){
+                               $(this).append('<br /><textarea id="'+options.debug_container+'" onclick="this.focus(); this.select()">'+results+'</textarea>'); 
+                            }
                            
                         }                       
 
@@ -624,9 +639,9 @@
                         if(value){
                            $(this).val(install_plugin); 
                         } else {
-                          $(this).html(install_plugin);  
+                            $(this).html(install_plugin);  
                         }
-                    }
+                    }                    
                 });
           }
     });
@@ -768,6 +783,12 @@ function jlembed_utf8_encode ( argString ) {
 }    
 
 })(jQuery);
+
+function jlembed_verifyWMPSize(id, height){
+    if(jQuery("#" + id).height() > height){
+        jQuery("#" + id).height(height);
+    }
+}
 
 // jlEmbed YouTube Functions
 // YouTube API Reference - http://code.google.com/apis/youtube/js_api_reference.html
