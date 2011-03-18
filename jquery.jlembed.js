@@ -4,7 +4,7 @@
     
     jlEmbed - A plugin for jQuery
     ==================================================================
-    ©2009-2011 JasonLau.biz - Version 4.9.7.4
+    ©2009-2011 JasonLau.biz - Version 4.9.7.5
     Based on a work at http://jasonlau.biz/home/jlembed-for-jquery
     Permissions beyond the scope of this license may be requested at 
     http://jasonlau.biz/home/contact-me.
@@ -821,6 +821,7 @@ function onYouTubePlayerReady(playerId){
 }
 
 function jlembed_ytPlayerListener(playerId) {
+    try{
      var playerBytesLoaded = jlembed_getVideoBytesLoaded(playerId),
      playerBytesTotal = jlembed_getVideoBytesTotal(playerId),
      playerCurrentTime = jlembed_getCurrentTime(playerId),
@@ -843,6 +844,7 @@ function jlembed_ytPlayerListener(playerId) {
      jQuery('#jlembed_yt_playpercent_' + playerId).val(playerPlayPercent);
      jQuery('#jlembed_yt_video_url_' + playerId).val(playerCurrentUrl);
      jQuery('#jlembed_yt_volume_' + playerId).val(playerCurrentVolume);
+     } catch(e){}
 }
 
 function jlembed_onPlayerStateChange(playerId) {
